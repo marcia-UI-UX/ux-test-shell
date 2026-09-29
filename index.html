@@ -205,7 +205,7 @@
   <!-- Done -->
   <section id="s-done" class="screen narrow" hidden>
     <h1 tabindex="-1">Thanks — you're done.</h1>
-    <p class="submit-status" id="submit-status" role="status" aria-live="polite">Submitting your results…</p>
+    <p class="submit-status" id="submit-status" role="status" aria-live="polite">Saving your results…</p>
     <p class="reference">Your reference: <strong id="ref-code"></strong></p>
     <details id="backup-details">
       <summary>Backup copy (only needed if something went wrong)</summary>
@@ -224,7 +224,7 @@
 (function () {
   'use strict';
 
-  var WEBHOOK = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appWS4a1lJbJO0RZm/wflbtU04FhuXBjG1J/wtrgXAQd8f9rdcxpB';
+  var WEBHOOK = 'https://default8619c67c945a48ae8e7735b1b71c9b.98.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/05/workflows/5f4f210ddaed43fbb4cf40f158cc9652/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=8F5tpTu0yiv10GygnDnFvd52iFd0vdDyq1Z0clofqj0';
   var RAW_LOG_MAX = 8000;
 
   var FIELDS = [
@@ -680,7 +680,7 @@
     try {
       var response = await fetch(WEBHOOK, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify(payload)
       });
       var text = await response.text();
@@ -693,10 +693,10 @@
     }
 
     if (ok) {
-      statusEl.textContent = 'Your results have been submitted.';
+      statusEl.textContent = 'Your results were saved';
       statusEl.className = 'submit-status ok';
     } else {
-      statusEl.textContent = 'Your results could not be submitted. Please open the backup copy below, click Copy, and send the text to the person who shared this test with you.';
+      statusEl.textContent = 'Saving failed — please copy the text below and send it to me';
       statusEl.className = 'submit-status fail';
       $('#backup-details').open = true;
     }
