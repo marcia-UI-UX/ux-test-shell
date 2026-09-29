@@ -1,16 +1,716 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Test</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charging station form – usability test</title>
+<!-- Hotjar snippet goes here -->
+<style>
+  :root {
+    --text: #1a1a1a;
+    --muted: #555;
+    --border: #8a8a8a;
+    --line: #d4d4d4;
+    --panel: #f4f4f5;
+    --bg: #fff;
+    --focus: #1d4ed8;
+    --error: #b3261e;
+    --primary: #262626;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 32px 20px 48px; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 16px; }
+  h2 { font-size: 1.0625rem; margin: 0 0 12px; }
+  h1:focus, h2:focus { outline: none; }
+  h1:focus-visible, h2:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+  p { margin: 0 0 12px; }
+  .eyebrow { font-size: .875rem; color: var(--muted); margin: 0 0 4px; }
+  .narrow { max-width: 560px; }
+  ul.plain { padding-left: 20px; margin: 0 0 24px; }
+  ul.plain li { margin-bottom: 8px; }
+
+  /* Form controls */
+  .field { margin: 0 0 18px; }
+  label, legend { display: block; font-weight: 600; margin-bottom: 4px; }
+  .hint { font-size: .875rem; color: var(--muted); margin: -2px 0 6px; }
+  input[type="text"], input[type="email"], select, textarea {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    padding: 8px 10px;
+    font: inherit;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  textarea { max-width: 100%; min-height: 96px; resize: vertical; }
+  select { height: 42px; }
+  input:focus, select:focus, textarea:focus {
+    outline: 3px solid var(--focus);
+    outline-offset: 1px;
+  }
+  [aria-invalid="true"] { border-color: var(--error); box-shadow: inset 0 0 0 1px var(--error); }
+  .error { color: var(--error); font-size: .875rem; font-weight: 600; margin: 6px 0 0; }
+
+  fieldset { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+  legend { padding: 0; margin-bottom: 8px; }
+  .radio { display: flex; align-items: center; gap: 10px; margin: 0 0 6px; font-weight: 400; cursor: pointer; }
+  .radio input { width: 18px; height: 18px; margin: 0; flex: none; }
+  .radio input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  .optional { font-weight: 400; color: var(--muted); }
+
+  /* Buttons */
+  .actions { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+  button {
+    font: inherit;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid var(--primary);
+  }
+  button.primary { background: var(--primary); color: #fff; }
+  button.secondary { background: #fff; color: var(--text); border-color: var(--border); }
+  button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  button:disabled { opacity: .6; cursor: default; }
+
+  /* Task layout */
+  .task-grid { display: grid; gap: 28px; }
+  .datacard {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 18px;
+  }
+  .datacard h2 { font-size: 1rem; margin-bottom: 10px; }
+  .datacard dl { margin: 0; display: grid; gap: 10px 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .datacard dt { font-size: .8125rem; color: var(--muted); }
+  .datacard dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .step-heading { font-size: .9375rem; color: var(--muted); font-weight: 600; margin: 0 0 14px; }
+  @media (min-width: 760px) {
+    .task-grid { grid-template-columns: 240px minmax(0, 1fr); align-items: start; gap: 40px; }
+    .datacard { position: sticky; top: 16px; }
+    .datacard dl { grid-template-columns: 1fr; }
+  }
+
+  /* Completion */
+  .reference { font-size: 1.125rem; }
+  .reference strong { font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  details { margin-top: 32px; border-top: 1px solid var(--line); padding-top: 16px; }
+  summary { cursor: pointer; color: var(--muted); }
+  summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  details textarea {
+    margin-top: 12px; min-height: 260px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8125rem;
+  }
+  .status { font-size: .875rem; color: var(--muted); margin: 0; align-self: center; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
+  }
+</style>
 </head>
 <body>
-  <h1>Pages is working</h1>
-  <p id="t"></p>
-  <script>
-    document.getElementById('t').textContent =
-      'JavaScript is running. ' + new Date().toISOString();
-  </script>
+<main id="app">
+
+  <!-- Welcome -->
+  <section id="s-welcome" class="screen narrow">
+    <h1 tabindex="-1">Charging station form: usability test</h1>
+    <p>Thanks for helping. This short test compares two versions of the same form.</p>
+    <div class="field">
+      <label for="role">Your role</label>
+      <select id="role" aria-describedby="role-error">
+        <option value="">Select your role</option>
+        <option value="designer">Designer</option>
+        <option value="developer">Developer</option>
+        <option value="QA">QA</option>
+        <option value="other">Other</option>
+      </select>
+      <p class="error" id="role-error" hidden></p>
+    </div>
+    <div class="actions"><button type="button" class="primary" id="btn-start">Start</button></div>
+  </section>
+
+  <!-- Instructions -->
+  <section id="s-instructions" class="screen narrow" hidden>
+    <h1 tabindex="-1">How this works</h1>
+    <ul class="plain">
+      <li>You'll fill in the same form twice, each time in a different layout.</li>
+      <li>We're measuring the design, not you. If something is awkward, that tells us something about the form.</li>
+      <li>The values to enter are shown next to the form. You don't need to remember anything.</li>
+      <li>Your results are anonymous.</li>
+      <li>It takes about 5 minutes. Work at your normal pace.</li>
+    </ul>
+    <div class="actions"><button type="button" class="primary" id="btn-begin">Start the first task</button></div>
+  </section>
+
+  <!-- Task (built by script) -->
+  <section id="s-task" class="screen" hidden></section>
+
+  <!-- Interstitial -->
+  <section id="s-inter" class="screen narrow" hidden>
+    <h1 tabindex="-1">Now the same form in a different layout.</h1>
+    <p>The values are different this time. As before, they're shown next to the form.</p>
+    <div class="actions"><button type="button" class="primary" id="btn-continue">Start the second task</button></div>
+  </section>
+
+  <!-- Questions -->
+  <section id="s-questions" class="screen narrow" hidden>
+    <h1 tabindex="-1">Three quick questions</h1>
+    <form id="q-form" novalidate>
+      <fieldset id="fs-pref" aria-describedby="pref-error">
+        <legend>Which version did you prefer?</legend>
+        <p class="error" id="pref-error" hidden></p>
+        <label class="radio"><input type="radio" name="pref" value="A"> The single page</label>
+        <label class="radio"><input type="radio" name="pref" value="B"> The three steps</label>
+        <label class="radio"><input type="radio" name="pref" value="no preference"> No preference</label>
+      </fieldset>
+
+      <div class="field">
+        <label for="comment">What was the most annoying part? <span class="optional">(optional)</span></label>
+        <textarea id="comment" rows="4"></textarea>
+      </div>
+
+      <fieldset id="fs-follow" aria-describedby="follow-error">
+        <legend>Can we contact you for a short follow-up?</legend>
+        <p class="error" id="follow-error" hidden></p>
+        <label class="radio"><input type="radio" name="follow" value="yes"> Yes</label>
+        <label class="radio"><input type="radio" name="follow" value="no"> No</label>
+      </fieldset>
+
+      <div class="field" id="email-wrap" hidden>
+        <label for="email">Email address</label>
+        <input type="email" id="email" autocomplete="email" spellcheck="false" aria-describedby="email-error">
+        <p class="error" id="email-error" hidden></p>
+      </div>
+
+      <div class="actions"><button type="submit" class="primary" id="btn-finish">Finish</button></div>
+    </form>
+  </section>
+
+  <!-- Done -->
+  <section id="s-done" class="screen narrow" hidden>
+    <h1 tabindex="-1">Thanks — you're done. Your results have been submitted.</h1>
+    <p class="reference">Your reference: <strong id="ref-code"></strong></p>
+    <details>
+      <summary>Backup copy (only needed if something went wrong)</summary>
+      <label for="backup" style="margin-top:12px">Result data</label>
+      <textarea id="backup" readonly spellcheck="false"></textarea>
+      <div class="actions">
+        <button type="button" class="secondary" id="btn-copy">Copy</button>
+        <p class="status" id="copy-status" aria-live="polite"></p>
+      </div>
+    </details>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  var WEBHOOK = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appWS4a1lJbJO0RZm/wflbtU04FhuXBjG1J/wtrgXAQd8f9rdcxpB';
+  var RAW_LOG_MAX = 8000;
+
+  var FIELDS = [
+    { key: 'station_name', label: 'Station name', kind: 'text' },
+    { key: 'street', label: 'Street', kind: 'text' },
+    { key: 'postcode', label: 'Postcode', kind: 'postcode', hint: '4 digits', inputmode: 'numeric' },
+    { key: 'connector', label: 'Connector', kind: 'select', options: ['CCS', 'CHAdeMO', 'Type 2', 'Tesla'] },
+    { key: 'power', label: 'Power (kW)', kind: 'power', hint: 'Whole number from 1 to 400', inputmode: 'numeric' },
+    { key: 'price', label: 'Price per kWh (CHF)', kind: 'price', hint: 'From 0.01 to 2.00, up to two decimals', inputmode: 'decimal' }
+  ];
+  var FIELD_BY_KEY = {};
+  FIELDS.forEach(function (f) { FIELD_BY_KEY[f.key] = f; });
+
+  var TASKS = [
+    { station_name: 'Bahnhofplatz Süd', street: 'Bahnhofstrasse 14', postcode: '5400', connector: 'CCS', power: 150, price: 0.54 },
+    { station_name: 'Seestrasse Nord', street: 'Seestrasse 88', postcode: '6300', connector: 'CHAdeMO', power: 75, price: 0.61 }
+  ];
+
+  var STEPS = [['station_name', 'street'], ['postcode', 'connector'], ['power', 'price']];
+
+  // ---------- State (in memory only) ----------
+  var state = {
+    t0: Date.now(),
+    participant: genCode(),
+    role: '',
+    order: 'AB',
+    orderSource: 'random',
+    results: { A: null, B: null },
+    log: [],
+    inProgress: false,
+    submitted: false
+  };
+  var cur = null; // current task context
+  var progFocus = false;
+
+  resolveOrder();
+  log('session_start', {
+    at: new Date(state.t0).toISOString(),
+    participant: state.participant,
+    order: state.order,
+    order_source: state.orderSource,
+    vw: window.innerWidth,
+    vh: window.innerHeight
+  });
+
+  // ---------- Helpers ----------
+  function $(sel, root) { return (root || document).querySelector(sel); }
+
+  function genCode() {
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var out = '';
+    var arr = new Uint32Array(4);
+    if (window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(arr);
+      for (var i = 0; i < 4; i++) out += chars[arr[i] % chars.length];
+    } else {
+      for (var j = 0; j < 4; j++) out += chars[Math.floor(Math.random() * chars.length)];
+    }
+    return 'P-' + out;
+  }
+
+  function randomHalf() {
+    if (window.crypto && window.crypto.getRandomValues) {
+      var a = new Uint8Array(1);
+      window.crypto.getRandomValues(a);
+      return a[0] < 128;
+    }
+    return Math.random() < 0.5;
+  }
+
+  function resolveOrder() {
+    var p = null;
+    try { p = new URLSearchParams(window.location.search).get('order'); } catch (e) { p = null; }
+    p = (p || '').trim().toLowerCase();
+    if (p === 'ab' || p === 'ba') {
+      state.order = p.toUpperCase();
+      state.orderSource = 'url';
+    } else {
+      state.order = randomHalf() ? 'AB' : 'BA';
+      state.orderSource = 'random';
+    }
+  }
+
+  function now() { return Date.now() - state.t0; }
+
+  function log(event, extra, ctx) {
+    var c = ctx === undefined ? cur : ctx;
+    var e = { t: now(), event: event };
+    if (c) {
+      e.task = c.run;
+      e.layout = c.layout;
+      if (c.layout === 'B') e.step = c.step;
+    }
+    if (extra) for (var k in extra) if (Object.prototype.hasOwnProperty.call(extra, k)) e[k] = extra[k];
+    state.log.push(e);
+  }
+
+  function showScreen(id) {
+    var screens = document.querySelectorAll('.screen');
+    for (var i = 0; i < screens.length; i++) screens[i].hidden = screens[i].id !== id;
+    window.scrollTo(0, 0);
+    var h = $('#' + id + ' h1');
+    if (h) h.focus();
+    log('screen', { screen: id.replace('s-', '') }, null);
+  }
+
+  function setError(control, errEl, msg) {
+    if (msg) {
+      errEl.textContent = msg;
+      errEl.hidden = false;
+      if (control) control.setAttribute('aria-invalid', 'true');
+    } else {
+      errEl.textContent = '';
+      errEl.hidden = true;
+      if (control) control.removeAttribute('aria-invalid');
+    }
+  }
+
+  function focusProgrammatic(el) {
+    progFocus = true;
+    try { el.focus(); } finally { progFocus = false; }
+  }
+
+  function normText(s) { return String(s).normalize('NFC').trim().toLowerCase(); }
+  function normNumStr(s) { return String(s).trim().replace(',', '.'); }
+  function fmtExpected(key, v) { return key === 'price' ? Number(v).toFixed(2) : String(v); }
+
+  // ---------- Validation ----------
+  function validate(key, raw) {
+    var v = String(raw == null ? '' : raw).trim();
+    switch (FIELD_BY_KEY[key].kind) {
+      case 'text':
+        if (!v) return { reason: 'required', msg: key === 'street' ? 'Enter the street and number.' : 'Enter the station name.' };
+        return null;
+      case 'postcode':
+        if (!v) return { reason: 'required', msg: 'Enter the postcode.' };
+        if (!/^\d{4}$/.test(v)) return { reason: 'not_4_digits', msg: 'Enter a postcode with exactly 4 digits.' };
+        return null;
+      case 'select':
+        if (!v) return { reason: 'required', msg: 'Choose a connector type.' };
+        return null;
+      case 'power':
+        if (!v) return { reason: 'required', msg: 'Enter the power in kW.' };
+        if (!/^\d+$/.test(v)) return { reason: 'not_integer', msg: 'Enter a whole number, without decimals.' };
+        var p = parseInt(v, 10);
+        if (p < 1 || p > 400) return { reason: 'out_of_range', msg: 'Enter a value from 1 to 400.' };
+        return null;
+      case 'price':
+        if (!v) return { reason: 'required', msg: 'Enter the price per kWh.' };
+        var n = normNumStr(v);
+        if (!/^(\d+(\.\d*)?|\.\d+)$/.test(n)) return { reason: 'not_number', msg: 'Enter a number, for example 0.45.' };
+        var frac = (n.split('.')[1] || '').replace(/0+$/, '');
+        if (frac.length > 2) return { reason: 'too_many_decimals', msg: 'Use no more than two decimals.' };
+        var x = parseFloat(n);
+        if (x < 0.01 - 1e-9 || x > 2 + 1e-9) return { reason: 'out_of_range', msg: 'Enter a value from 0.01 to 2.00.' };
+        return null;
+    }
+    return null;
+  }
+
+  // ---------- Task rendering ----------
+  function fieldHTML(f) {
+    var id = 'f-' + f.key;
+    var desc = (f.hint ? 'h-' + f.key + ' ' : '') + 'e-' + f.key;
+    var hint = f.hint ? '<p class="hint" id="h-' + f.key + '">' + f.hint + '</p>' : '';
+    var control;
+    if (f.kind === 'select') {
+      control = '<select id="' + id + '" name="' + f.key + '" aria-describedby="' + desc + '">' +
+        '<option value="">Select…</option>' +
+        f.options.map(function (o) { return '<option value="' + o + '">' + o + '</option>'; }).join('') +
+        '</select>';
+    } else {
+      control = '<input type="text" id="' + id + '" name="' + f.key + '" inputmode="' + (f.inputmode || 'text') +
+        '" autocomplete="off" spellcheck="false" aria-describedby="' + desc + '">';
+    }
+    return '<div class="field" data-field="' + f.key + '"><label for="' + id + '">' + f.label + '</label>' +
+      hint + control + '<p class="error" id="e-' + f.key + '" hidden></p></div>';
+  }
+
+  function startRun(runIndex) {
+    var layout = state.order.charAt(runIndex);
+    var task = TASKS[runIndex];
+    var ctx = {
+      run: runIndex + 1, layout: layout, task: task, step: 1,
+      shownAt: null, started: null, ended: null,
+      vfails: 0, backs: 0, done: false
+    };
+    cur = ctx;
+
+    var card = '<aside class="datacard" aria-labelledby="dc-h"><h2 id="dc-h">Values to enter</h2><dl>' +
+      FIELDS.map(function (f) {
+        return '<div><dt>' + f.label + '</dt><dd>' + fmtExpected(f.key, task[f.key]) + '</dd></div>';
+      }).join('') + '</dl></aside>';
+
+    var body;
+    if (layout === 'A') {
+      body = FIELDS.map(fieldHTML).join('');
+    } else {
+      body = '<h2 class="step-heading" id="step-h" tabindex="-1">Step 1 of 3</h2>' +
+        STEPS.map(function (keys, i) {
+          return '<div class="step" data-step="' + (i + 1) + '"' + (i ? ' hidden' : '') + '>' +
+            keys.map(function (k) { return fieldHTML(FIELD_BY_KEY[k]); }).join('') + '</div>';
+        }).join('');
+    }
+
+    var actions = '<div class="actions">' +
+      (layout === 'B' ? '<button type="button" class="secondary" id="btn-back" hidden>Back</button>' : '') +
+      '<button type="submit" class="primary" id="btn-primary">' + (layout === 'B' ? 'Next' : 'Submit') + '</button></div>';
+
+    var screen = $('#s-task');
+    screen.innerHTML =
+      '<p class="eyebrow">Task ' + ctx.run + ' of 2</p>' +
+      '<h1 tabindex="-1">Register a charging station</h1>' +
+      '<div class="task-grid">' + card +
+      '<form id="task-form" novalidate aria-labelledby="form-label"><span id="form-label" hidden>Register a charging station</span>' +
+      body + actions + '</form></div>';
+
+    var form = $('#task-form');
+
+    // Field instrumentation
+    FIELDS.forEach(function (f) {
+      var el = $('#f-' + f.key, form);
+      el.addEventListener('focus', function () {
+        if (ctx.done) return;
+        if (progFocus) { log('focus', { field: f.key, programmatic: true }, ctx); return; }
+        markStart(ctx);
+        log('focus', { field: f.key }, ctx);
+      });
+      el.addEventListener('blur', function () {
+        if (ctx.done) return;
+        log('blur', { field: f.key }, ctx);
+      });
+      el.addEventListener('keydown', function () {
+        if (ctx.done) return;
+        markStart(ctx);
+      });
+    });
+
+    var back = $('#btn-back', form);
+    if (back) {
+      back.addEventListener('click', function () {
+        if (ctx.done || ctx.step <= 1) return;
+        log('back', null, ctx);
+        ctx.backs++;
+        goStep(ctx, ctx.step - 1);
+      });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (ctx.done) return;
+      if (ctx.layout === 'B' && ctx.step < 3) {
+        log('next', null, ctx);
+        if (validateKeys(ctx, form, STEPS[ctx.step - 1])) goStep(ctx, ctx.step + 1);
+      } else {
+        log('submit_click', null, ctx);
+        var keys = ctx.layout === 'A' ? FIELDS.map(function (f) { return f.key; }) : STEPS[2];
+        if (validateKeys(ctx, form, keys)) finishRun(ctx, form);
+      }
+    });
+
+    showScreen('s-task');
+    ctx.shownAt = now();
+  }
+
+  function markStart(ctx) {
+    if (ctx.started === null) {
+      ctx.started = now();
+      log('task_start', null, ctx);
+    }
+  }
+
+  function goStep(ctx, n) {
+    ctx.step = n;
+    var steps = document.querySelectorAll('#task-form .step');
+    for (var i = 0; i < steps.length; i++) steps[i].hidden = Number(steps[i].getAttribute('data-step')) !== n;
+    var h = $('#step-h');
+    h.textContent = 'Step ' + n + ' of 3';
+    $('#btn-back').hidden = n === 1;
+    $('#btn-primary').textContent = n === 3 ? 'Submit' : 'Next';
+    h.focus();
+  }
+
+  function validateKeys(ctx, form, keys) {
+    var firstBad = null;
+    keys.forEach(function (k) {
+      var el = $('#f-' + k, form);
+      var err = validate(k, el.value);
+      setError(el, $('#e-' + k, form), err ? err.msg : '');
+      if (err) {
+        ctx.vfails++;
+        log('validation_fail', { field: k, reason: err.reason }, ctx);
+        if (!firstBad) firstBad = el;
+      }
+    });
+    if (firstBad) { focusProgrammatic(firstBad); return false; }
+    return true;
+  }
+
+  function finishRun(ctx, form) {
+    ctx.ended = now();
+    log('task_end', null, ctx);
+    ctx.done = true;
+    if (ctx.started === null) {
+      ctx.started = ctx.shownAt;
+      log('task_start_missing', { fallback: 'screen_shown' }, ctx);
+    }
+
+    var values = {};
+    FIELDS.forEach(function (f) { values[f.key] = $('#f-' + f.key, form).value; });
+    var cmp = compare(ctx.task, values);
+
+    state.results[ctx.layout] = {
+      completed: cmp.mismatches.length === 0,
+      time_sec: Math.round((ctx.ended - ctx.started) / 1000),
+      field_errors: cmp.mismatches.length,
+      error_detail: cmp.mismatches.join('; '),
+      validation_fails: ctx.vfails,
+      back_nav: ctx.backs
+    };
+
+    cur = null;
+    if (ctx.run === 1) showScreen('s-inter');
+    else showScreen('s-questions');
+  }
+
+  function compare(task, values) {
+    var mismatches = [];
+    FIELDS.forEach(function (f) {
+      var got = String(values[f.key] == null ? '' : values[f.key]).trim();
+      var exp = task[f.key];
+      var ok;
+      switch (f.kind) {
+        case 'text': ok = normText(got) === normText(exp); break;
+        case 'postcode': ok = got === String(exp); break;
+        case 'select': ok = got === exp; break;
+        case 'power': ok = got !== '' && Number(got) === exp; break;
+        case 'price':
+          var n = parseFloat(normNumStr(got));
+          ok = !isNaN(n) && Math.abs(n - exp) < 1e-9;
+          break;
+        default: ok = got === String(exp);
+      }
+      if (!ok) mismatches.push(f.key + ': expected ' + fmtExpected(f.key, exp) + ', got ' + (got === '' ? '(empty)' : got));
+    });
+    return { mismatches: mismatches };
+  }
+
+  // ---------- Welcome & instructions ----------
+  $('#btn-start').addEventListener('click', function () {
+    var sel = $('#role');
+    if (!sel.value) {
+      setError(sel, $('#role-error'), 'Choose your role to continue.');
+      sel.focus();
+      return;
+    }
+    setError(sel, $('#role-error'), '');
+    state.role = sel.value;
+    log('role', { role: state.role }, null);
+    showScreen('s-instructions');
+  });
+
+  $('#btn-begin').addEventListener('click', function () {
+    state.inProgress = true;
+    startRun(0);
+  });
+
+  $('#btn-continue').addEventListener('click', function () {
+    startRun(1);
+  });
+
+  // ---------- Questions ----------
+  function radioValue(name) {
+    var r = document.querySelector('input[name="' + name + '"]:checked');
+    return r ? r.value : null;
+  }
+
+  var followRadios = document.querySelectorAll('input[name="follow"]');
+  for (var i = 0; i < followRadios.length; i++) {
+    followRadios[i].addEventListener('change', function () {
+      var yes = radioValue('follow') === 'yes';
+      $('#email-wrap').hidden = !yes;
+      if (!yes) setError($('#email'), $('#email-error'), '');
+    });
+  }
+
+  $('#q-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (state.submitted) return;
+
+    var firstBad = null;
+    var pref = radioValue('pref');
+    var follow = radioValue('follow');
+    var emailEl = $('#email');
+    var email = emailEl.value.trim();
+
+    setError(null, $('#pref-error'), pref ? '' : 'Choose one option.');
+    if (!pref) firstBad = firstBad || document.querySelector('input[name="pref"]');
+
+    setError(null, $('#follow-error'), follow ? '' : 'Choose Yes or No.');
+    if (!follow) firstBad = firstBad || document.querySelector('input[name="follow"]');
+
+    if (follow === 'yes') {
+      var emailMsg = '';
+      if (!email) emailMsg = 'Enter your email address.';
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) emailMsg = 'Enter a valid email address, for example name@example.com.';
+      setError(emailEl, $('#email-error'), emailMsg);
+      if (emailMsg) firstBad = firstBad || emailEl;
+    } else {
+      setError(emailEl, $('#email-error'), '');
+    }
+
+    if (firstBad) { firstBad.focus(); return; }
+
+    state.submitted = true;
+    $('#btn-finish').disabled = true;
+    log('finish', null, null);
+
+    var A = state.results.A || {};
+    var B = state.results.B || {};
+    var rawLog = JSON.stringify(state.log);
+    if (rawLog.length > RAW_LOG_MAX) rawLog = rawLog.slice(0, RAW_LOG_MAX);
+
+    var payload = {
+      participant: state.participant,
+      role: state.role,
+      order: state.order,
+      completed_a: !!A.completed,
+      completed_b: !!B.completed,
+      time_a_sec: A.time_sec,
+      time_b_sec: B.time_sec,
+      field_errors_a: A.field_errors,
+      field_errors_b: B.field_errors,
+      validation_fails_a: A.validation_fails,
+      validation_fails_b: B.validation_fails,
+      back_nav_b: B.back_nav,
+      error_detail_a: A.error_detail || '',
+      error_detail_b: B.error_detail || '',
+      preference: pref,
+      comment: $('#comment').value.trim(),
+      followup_consent: follow === 'yes',
+      followup_email: follow === 'yes' ? email : '',
+      raw_log: rawLog
+    };
+
+    var body = JSON.stringify(payload);
+    try {
+      fetch(WEBHOOK, {
+        method: 'POST',
+        mode: 'no-cors',
+        keepalive: true,
+        headers: { 'Content-Type': 'text/plain' },
+        body: body
+      }).catch(function () { /* fire-and-forget */ });
+    } catch (err) { /* fire-and-forget */ }
+
+    state.inProgress = false;
+    $('#ref-code').textContent = state.participant;
+    $('#backup').value = JSON.stringify(payload, null, 2);
+    showScreen('s-done');
+  });
+
+  // ---------- Completion ----------
+  $('#btn-copy').addEventListener('click', function () {
+    var ta = $('#backup');
+    var status = $('#copy-status');
+    function fallback() {
+      ta.focus();
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      status.textContent = ok ? 'Copied.' : 'Copy failed. Select the text and copy it manually.';
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(ta.value).then(function () {
+        status.textContent = 'Copied.';
+      }, fallback);
+    } else {
+      fallback();
+    }
+  });
+
+  // Warn before leaving mid-test
+  window.addEventListener('beforeunload', function (e) {
+    if (state.inProgress) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  // Initial focus
+  $('#s-welcome h1').focus();
+})();
+</script>
 </body>
 </html>
