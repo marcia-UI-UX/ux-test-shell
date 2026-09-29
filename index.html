@@ -115,6 +115,9 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8125rem;
   }
   .status { font-size: .875rem; color: var(--muted); margin: 0; align-self: center; }
+  .submit-status { font-size: .9375rem; }
+  .submit-status.ok { color: #1f6f3a; }
+  .submit-status.fail { color: var(--error); font-weight: 600; }
 
   @media (prefers-reduced-motion: reduce) {
     * { scroll-behavior: auto !important; transition: none !important; animation: none !important; }
@@ -201,9 +204,10 @@
 
   <!-- Done -->
   <section id="s-done" class="screen narrow" hidden>
-    <h1 tabindex="-1">Thanks — you're done. Your results have been submitted.</h1>
+    <h1 tabindex="-1">Thanks — you're done.</h1>
+    <p class="submit-status" id="submit-status" role="status" aria-live="polite">Submitting your results…</p>
     <p class="reference">Your reference: <strong id="ref-code"></strong></p>
-    <details>
+    <details id="backup-details">
       <summary>Backup copy (only needed if something went wrong)</summary>
       <label for="backup" style="margin-top:12px">Result data</label>
       <textarea id="backup" readonly spellcheck="false"></textarea>
@@ -607,7 +611,7 @@
     });
   }
 
-  $('#q-form').addEventListener('submit', function (e) {
+  $('#q-form').addEventListener('submit', async function (e) {
     e.preventDefault();
     if (state.submitted) return;
 
@@ -666,21 +670,36 @@
       raw_log: rawLog
     };
 
-    var body = JSON.stringify(payload);
-    try {
-      fetch(WEBHOOK, {
-        method: 'POST',
-        mode: 'no-cors',
-        keepalive: true,
-        headers: { 'Content-Type': 'text/plain' },
-        body: body
-      }).catch(function () { /* fire-and-forget */ });
-    } catch (err) { /* fire-and-forget */ }
-
     state.inProgress = false;
     $('#ref-code').textContent = state.participant;
     $('#backup').value = JSON.stringify(payload, null, 2);
     showScreen('s-done');
+
+    var statusEl = $('#submit-status');
+    var ok = false;
+    try {
+      var response = await fetch(WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      var text = await response.text();
+      console.log('Webhook response status:', response.status);
+      console.log('Webhook response body:', text);
+      ok = response.ok;
+    } catch (err) {
+      console.log('Webhook request failed:', err);
+      ok = false;
+    }
+
+    if (ok) {
+      statusEl.textContent = 'Your results have been submitted.';
+      statusEl.className = 'submit-status ok';
+    } else {
+      statusEl.textContent = 'Your results could not be submitted. Please open the backup copy below, click Copy, and send the text to the person who shared this test with you.';
+      statusEl.className = 'submit-status fail';
+      $('#backup-details').open = true;
+    }
   });
 
   // ---------- Completion ----------
